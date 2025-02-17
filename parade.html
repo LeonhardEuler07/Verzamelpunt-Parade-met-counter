@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NZQYZC00S5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-NZQYZC00S5');
+    </script>
+
+    <title>Verzamelpunten</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Deze regel zorgt dat de hele viewport wordt opgevuld. 
+               Wil je kunnen scrollen bij meer content, vervang dan door min-height: 100vh; */
+            height: 100vh; 
+            
+            /* Zorg dat de footer de inhoud niet overlapt */
+            padding-bottom: 80px; 
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .button {
+            width: 100%;
+            max-width: 400px;
+            height: 60px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        #map-container {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+        }
+        .back-button {
+            width: 100%;
+            max-width: 400px;
+            height: 50px;
+            background-color: #FF4136;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .back-button:hover {
+            background-color: #D32F2F;
+        }
+
+        /* Vaste footer onderaan */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            text-align: center;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div id="start-container" class="container">
+        <button class="button" onclick="shareLocation()">
+            📍 Deel de locatie van dit Verzamelpunt via Whatsapp.
+        </button>
+        <button class="button" onclick="showMap()">
+            🗺️ Alle Verzamelpunten bekijken.
+        </button>
+    </div>
+    
+    <div id="map-container" class="container">
+        <button class="back-button" onclick="showStart()">⬅️ Terug</button>
+        <h1>📌 Alle Verzamelpunten</h1>
+        <p>Kies een Verzamelpunt om te verzamelen</p>
+        <p><strong>💡 Tip:</strong> Bewaar deze pagina om elkaar niet meer kwijt te raken en altijd een herkenningspunt te hebben! 📲</p>
+        <div id="map"></div>
+    </div>
+    
+    <script>
+        function shareLocation() {
+            var locationLink = "https://maps.app.goo.gl/2ysviem194C39ujRA";
+            var message = `📍 Ik sta bij Verzamelpunt Parade, kom jij hier naartoe? Hier is de locatie: ${locationLink}`;
+            var whatsappLink = `whatsapp://send?text=${encodeURIComponent(message)}`;
+            window.location.href = whatsappLink;
+        }
+
+        function showMap() {
+            document.getElementById('start-container').style.display = 'none';
+            document.getElementById('map-container').style.display = 'block';
+            initMap();
+        }
+        
+        function showStart() {
+            document.getElementById('map-container').style.display = 'none';
+            document.getElementById('start-container').style.display = 'flex';
+        }
+        
+        function initMap() {
+            var map = L.map('map').setView([51.6904, 5.3002], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            var userIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            });
+            
+            map.locate({ setView: true, maxZoom: 18, enableHighAccuracy: true });
+            map.on('locationfound', function(e) {
+                L.marker(e.latlng, {icon: userIcon}).addTo(map)
+                    .bindPopup("📍 Je bent hier!").openPopup();
+            });
+            
+            var points = [
+                { name: "Verzamelpunt Smalle Haven", coords: [51.6904, 5.3002], link: "https://maps.app.goo.gl/KzWM2kLfrk3BWGoR7" },
+                { name: "Verzamelpunt Waterstraat", coords: [51.6865, 5.3035], link: "https://maps.app.goo.gl/A2DwdeaKmYpnyW199" },
+                { name: "Verzamelpunt Markt", coords: [51.6891, 5.3027], link: "https://maps.app.goo.gl/RuPZsr4vT1LXamYPA" },
+                { name: "Verzamelpunt Parade", coords: [51.6868, 5.3083], link: "https://maps.app.goo.gl/2ysviem194C39ujRA" },
+                { name: "Verzamelpunt Nieuwstraat", coords: [51.6910, 5.3071], link: "https://maps.app.goo.gl/4fpsNe9ty6ouQg6R8" }
+            ];
+            
+            points.forEach(function(point) {
+                var whatsappLink = `whatsapp://send?text=${encodeURIComponent("📍 Ik loop naar " + point.name + ", kom jij hier ook naartoe? Hier is de locatie: " + point.link)}`;
+                L.marker(point.coords).addTo(map)
+                    .bindPopup(`<b>${point.name}</b><br><a href='${whatsappLink}' target='_blank' style='color: #007BFF; text-decoration: none;'>📩 Deel via WhatsApp</a>`);
+            });
+        }
+    </script>
+
+    <!-- Vaste footer met teller -->
+    <div class="footer">
+        <p>Aantal gebruikers:</p>
+        <div id="sfcu7g9j9daknpb7m99bt1ahhjq847rb8h7"></div>
+        <script type="text/javascript"
+                src="https://counter6.optistats.ovh/private/counter.js?c=u7g9j9daknpb7m99bt1ahhjq847rb8h7&down=async"
+                async>
+        </script>
+        <noscript>
+            <a href="https://www.freecounterstat.com" title="website hit counter">
+                <img src="https://counter6.optistats.ovh/private/freecounterstat.php?c=u7g9j9daknpb7m99bt1ahhjq847rb8h7"
+                     border="0" title="website hit counter" alt="website hit counter">
+            </a>
+        </noscript>
+    </div>
+</body>
+</html>
